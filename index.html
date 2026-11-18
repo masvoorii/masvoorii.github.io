@@ -18,7 +18,7 @@
             class="w-11 h-11 rounded-xl object-cover bg-slate-800 border border-slate-700 shrink-0">
           <div>
             <h1 class="text-lg md:text-xl font-bold text-blue-400 leading-tight">Nathan Game Palembang</h1>
-            <p class="text-xs text-slate-400">Pilih game favoritmu, cek total GB, & order langsung via WhatsApp</p>
+            <p class="text-xs text-slate-400">Katalog Game Resmi • Palembang</p>
           </div>
         </div>
 
@@ -68,10 +68,19 @@
 
     <!-- Grid Katalog Game -->
     <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      <!-- Skeleton Loading -->
       <div class="col-span-full py-16 text-center text-slate-400 text-sm">Memuat katalog game...</div>
     </div>
   </main>
+
+  <!-- Tombol WhatsApp Melayang di Pojok Kanan Bawah -->
+  <a id="floatingWaBtn" href="#" target="_blank" onclick="openGeneralWA(event)"
+    title="Chat WhatsApp Nathan Game Palembang"
+    class="fixed right-5 bottom-5 z-30 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-full shadow-lg shadow-emerald-950/60 flex items-center gap-2 transition-all duration-300 hover:scale-105">
+    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/>
+    </svg>
+    <span class="text-xs font-semibold hidden sm:inline">Chat Admin</span>
+  </a>
 
   <!-- Floating Bar Keranjang WhatsApp (Muncul saat user memilih minimal 1 game) -->
   <div id="cartBar" class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-700 shadow-2xl transform translate-y-full transition-transform duration-300">
@@ -94,13 +103,58 @@
       <button onclick="checkoutWhatsApp()"
         class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
         <span>📲</span>
-        <span>Pesan via WhatsApp</span>
+        <span>Kirim Daftar ke WhatsApp</span>
       </button>
     </div>
   </div>
 
-  <!-- Modal Detail Daftar Pilihan -->
-  <div id="cartModal" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+  <!-- Modal Detail & Sinopsis Game (Muncul saat kartu game diklik) -->
+  <div id="detailModal" onclick="if(event.target === this) closeDetailModal()"
+    class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-fadeIn">
+      <div class="flex flex-col sm:flex-row gap-4 p-5">
+        <!-- Cover Game -->
+        <img id="detailCover" src="" alt="Cover"
+          onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
+          class="w-32 h-44 sm:w-36 sm:h-48 object-fill rounded-xl bg-slate-800 border border-slate-700 mx-auto sm:mx-0 shrink-0 shadow-md">
+        
+        <!-- Informasi & Sinopsis -->
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start gap-2">
+              <h3 id="detailTitle" class="font-bold text-base sm:text-lg text-white leading-snug">Judul Game</h3>
+              <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl font-bold leading-none">&times;</button>
+            </div>
+            
+            <div class="flex flex-wrap gap-1.5 mt-2 mb-3">
+              <span id="detailPlatform" class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300">PS4</span>
+              <span id="detailSize" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-200">0 GB</span>
+              <span id="detailGenre" class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-400">Genre</span>
+            </div>
+
+            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 max-h-36 overflow-y-auto">
+              <p class="text-[11px] font-semibold text-slate-400 mb-1">Sinopsis / Tentang Game:</p>
+              <p id="detailSynopsis" class="text-xs text-slate-300 leading-relaxed">Memuat sinopsis game...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol Aksi Modal -->
+      <div class="bg-slate-950/80 px-5 py-3.5 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeDetailModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300">
+          Tutup
+        </button>
+        <button id="detailSelectBtn" onclick="" class="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+          + Pilih Game Ini
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detail Daftar Pilihan Keranjang -->
+  <div id="cartModal" onclick="if(event.target === this) toggleModalList()"
+    class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
         <h3 class="font-bold text-base text-slate-100">Daftar Game Pilihanmu</h3>
@@ -130,8 +184,8 @@
     let whatsappNumber = "6281200000000";
     let selectedPlatform = "ALL";
     let selectedGameIds = new Set();
+    let synopsisCache = {}; // Menyimpan sinopsis agar tidak memuat ulang
 
-    // Konversi string ukuran (misal "32.5 GB" atau "850 MB") ke angka GB
     function parseSizeToGB(sizeStr) {
       if (!sizeStr) return 0;
       const str = sizeStr.toString().toUpperCase().replace(',', '.');
@@ -242,10 +296,10 @@
       grid.innerHTML = list.map(g => {
         const isSelected = selectedGameIds.has(g.id);
         return `
-          <div onclick="toggleGame('${g.id}')"
+          <div onclick="openGameDetail('${g.id}')"
             class="cursor-pointer group bg-slate-900 rounded-2xl overflow-hidden border transition-all duration-200 flex flex-col ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-800 hover:border-slate-600'}">
             
-            <!-- Cover Poster (object-fill agar pas bingkai) -->
+            <!-- Cover Poster -->
             <div class="relative aspect-[3/4] w-full bg-slate-800 overflow-hidden">
               <img src="${g.cover}" alt="${g.nama}" loading="lazy"
                 onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
@@ -261,10 +315,12 @@
                 ${g.ukuran}
               </span>
 
-              <!-- Indikator Terpilih -->
-              <div class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-950/70 text-slate-400 border border-slate-600'}">
+              <!-- Tombol Pilih Cepat (+ / ✓) -->
+              <button type="button" onclick="event.stopPropagation(); toggleGame('${g.id}')"
+                title="${isSelected ? 'Batalkan pilihan' : 'Pilih game ini'}"
+                class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md transition ${isSelected ? 'bg-emerald-500 text-slate-950 scale-110' : 'bg-slate-950/80 hover:bg-blue-600 text-slate-200 border border-slate-600'}">
                 ${isSelected ? '✓' : '+'}
-              </div>
+              </button>
             </div>
 
             <!-- Info Game -->
@@ -276,14 +332,75 @@
                 <p class="text-[11px] text-slate-400 truncate">${g.genre}</p>
               </div>
               <div class="mt-3 pt-2 border-t border-slate-800/80 flex justify-between items-center">
-                <span class="text-[11px] font-medium ${isSelected ? 'text-emerald-400' : 'text-slate-400'}">
-                  ${isSelected ? 'Dipilih' : 'Klik untuk pilih'}
-                </span>
+                <span class="text-[11px] text-blue-400/90 group-hover:underline">Lihat sinopsis</span>
+                ${isSelected ? '<span class="text-[10px] font-bold text-emerald-400">Terpilih</span>' : ''}
               </div>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Buka Modal Sinopsis Game
+    async function openGameDetail(id) {
+      const game = allGames.find(g => g.id == id);
+      if (!game) return;
+
+      document.getElementById('detailCover').src = game.cover;
+      document.getElementById('detailTitle').innerText = game.nama;
+      document.getElementById('detailPlatform').innerText = game.platform;
+      document.getElementById('detailSize').innerText = game.ukuran;
+      document.getElementById('detailGenre').innerText = game.genre;
+
+      updateDetailModalButton(game.id);
+      document.getElementById('detailModal').classList.remove('hidden');
+
+      const synEl = document.getElementById('detailSynopsis');
+      if (synopsisCache[game.id]) {
+        synEl.innerText = synopsisCache[game.id];
+        return;
+      }
+
+      synEl.innerText = 'Mengambil sinopsis game...';
+      try {
+        // Bersihkan keterangan dalam kurung seperti (PS2 Classic) / (Subtitle Indonesia) agar pencarian akurat
+        const cleanTitle = game.nama.replace(/\s*\(.*?\)\s*/g, '').trim();
+        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTitle + ' video game')}&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const pages = data.query?.pages ? Object.values(data.query.pages) : [];
+
+        if (pages.length > 0 && pages[0].extract) {
+          synopsisCache[game.id] = pages[0].extract;
+          synEl.innerText = pages[0].extract;
+        } else {
+          const fallbackText = `${game.nama} adalah game bergenre ${game.genre} untuk konsol ${game.platform} dengan ukuran file ${game.ukuran}.`;
+          synopsisCache[game.id] = fallbackText;
+          synEl.innerText = fallbackText;
+        }
+      } catch (err) {
+        synEl.innerText = `${game.nama} (${game.platform}) • Genre: ${game.genre} • Ukuran: ${game.ukuran}.`;
+      }
+    }
+
+    function updateDetailModalButton(id) {
+      const btn = document.getElementById('detailSelectBtn');
+      const isSelected = selectedGameIds.has(id);
+      if (isSelected) {
+        btn.innerText = '✓ Sudah Dipilih (Klik untuk Batal)';
+        btn.className = 'px-5 py-2 rounded-xl text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition';
+      } else {
+        btn.innerText = '+ Pilih Game Ini';
+        btn.className = 'px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition';
+      }
+      btn.onclick = function() {
+        toggleGame(id);
+        updateDetailModalButton(id);
+      };
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.add('hidden');
     }
 
     function toggleGame(id) {
@@ -306,6 +423,7 @@
       const count = selectedGameIds.size;
       const bar = document.getElementById('cartBar');
       const clearBtn = document.getElementById('btnClearCart');
+      const waFloat = document.getElementById('floatingWaBtn');
 
       let totalGB = 0;
       const selectedItems = allGames.filter(g => selectedGameIds.has(g.id));
@@ -322,13 +440,17 @@
       if (count > 0) {
         bar.classList.remove('translate-y-full');
         clearBtn.classList.remove('hidden');
+        // Naikkan tombol WA melayang agar tidak tertutup bar keranjang
+        waFloat.classList.remove('bottom-5');
+        waFloat.classList.add('bottom-24');
       } else {
         bar.classList.add('translate-y-full');
         clearBtn.classList.add('hidden');
         document.getElementById('cartModal').classList.add('hidden');
+        waFloat.classList.remove('bottom-24');
+        waFloat.classList.add('bottom-5');
       }
 
-      // Update isi modal
       document.getElementById('modalCartItems').innerHTML = selectedItems.map((g, i) => `
         <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800">
           <div class="pr-2">
@@ -341,8 +463,13 @@
     }
 
     function toggleModalList() {
-      const modal = document.getElementById('cartModal');
-      modal.classList.toggle('hidden');
+      document.getElementById('cartModal').classList.toggle('hidden');
+    }
+
+    function openGeneralWA(e) {
+      e.preventDefault();
+      const text = "Halo *Nathan Game Palembang* 👋\nSaya mau tanya-tanya soal isi game PS / ketersediaan game ya min.";
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     function checkoutWhatsApp() {
@@ -358,8 +485,7 @@
       const formattedGB = totalGB.toFixed(1).replace('.0', '');
       const text = `Halo *Nathan Game Palembang* 👋\nSaya mau order isi game dengan daftar berikut:\n\n${listLines}\n\n*Total Game:* ${selectedItems.length} Game\n*Estimasi Storage:* ~${formattedGB} GB\n\nMohon info jadwal/ketersediaannya ya min. Terima kasih!`;
 
-      const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
-      window.open(waUrl, '_blank');
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     initCatalog();
