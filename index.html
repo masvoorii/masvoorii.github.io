@@ -341,7 +341,7 @@
       }).join('');
     }
 
-    // Buka Modal Sinopsis Game (Otomatis Bahasa Indonesia)
+// Buka Modal Sinopsis Game (Terkunci Akurat ke Entitas Game + Bahasa Indonesia)
     async function openGameDetail(id) {
       const game = allGames.find(g => g.id == id);
       if (!game) return;
@@ -365,20 +365,45 @@
       const cleanTitle = game.nama.replace(/\s*\(.*?\)\s*/g, '').trim();
 
       try {
-        // 1. Cek Wikipedia Bahasa Indonesia terlebih dahulu
-        const idUrl = `https://id.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTitle + ' permainan video')}&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
-        const idRes = await fetch(idUrl);
-        const idData = await idRes.json();
-        const idPages = idData.query?.pages ? Object.values(idData.query.pages) : [];
+        // 1. Kunci entitas pasti gamenya lewat Wikidata agar tidak nyasar ke pengisi suara/game lain
+        const wdSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(cleanTitle)}&language=en&limit=5&format=json&origin=*`;
+        const wdRes = await fetch(wdSearchUrl);
+        const wdData = await wdRes.json();
 
-        if (idPages.length > 0 && idPages[0].extract && idPages[0].extract.length > 80) {
-          synopsisCache[game.id] = idPages[0].extract;
-          synEl.innerText = idPages[0].extract;
-          return;
+        let targetEntity = (wdData.search || []).find(item => {
+          const desc = (item.description || '').toLowerCase();
+          return desc.includes('video game') || desc.includes('game');
+        }) || (wdData.search || [])[0];
+
+        let idWikiTitle = '';
+        let enWikiTitle = cleanTitle;
+
+        if (targetEntity) {
+          const detailUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${targetEntity.id}&props=sitelinks&sitefilter=idwiki|enwiki&format=json&origin=*`;
+          const detailRes = await fetch(detailUrl);
+          const detailData = await detailRes.json();
+          const sitelinks = detailData.entities?.[targetEntity.id]?.sitelinks || {};
+
+          if (sitelinks.idwiki) idWikiTitle = sitelinks.idwiki.title;
+          if (sitelinks.enwiki) enWikiTitle = sitelinks.enwiki.title;
         }
 
-        // 2. Jika belum ada di Wiki ID, tarik dari Wiki Inggris lalu terjemahkan ke Bahasa Indonesia
-        const enUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(cleanTitle + ' video game')}&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
+        // 2. Jika punya artikel resmi di Wikipedia Indonesia, ambil langsung
+        if (idWikiTitle) {
+          const idUrl = `https://id.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(idWikiTitle)}&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
+          const idRes = await fetch(idUrl);
+          const idData = await idRes.json();
+          const idPages = idData.query?.pages ? Object.values(idData.query.pages) : [];
+
+          if (idPages.length > 0 && idPages[0].extract && idPages[0].extract.length > 60) {
+            synopsisCache[game.id] = idPages[0].extract;
+            synEl.innerText = idPages[0].extract;
+            return;
+          }
+        }
+
+        // 3. Jika belum ada di Wiki ID, tarik dari artikel resmi Wiki Inggris lalu terjemahkan ke Bahasa Indonesia
+        const enUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(enWikiTitle)}&redirects=1&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
         const enRes = await fetch(enUrl);
         const enData = await enRes.json();
         const enPages = enData.query?.pages ? Object.values(enData.query.pages) : [];
@@ -394,7 +419,6 @@
             synopsisCache[game.id] = translatedText;
             synEl.innerText = translatedText;
           } catch (trErr) {
-            // Jika terjemahan gagal, tampilkan teks asli
             synopsisCache[game.id] = enText;
             synEl.innerText = enText;
           }
