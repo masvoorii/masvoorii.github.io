@@ -47,8 +47,10 @@
           </select>
           <select id="sortFilter" onchange="applyFilters()"
             class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
-            <option value="NEWEST">Terbaru</option>
+            <option value="NEWEST">Terbaru Ditambahkan</option>
+            <option value="OLDEST">Terlama</option>
             <option value="AZ">Judul A - Z</option>
+            <option value="ZA">Judul Z - A</option>
             <option value="SIZE_ASC">Ukuran Terkecil</option>
             <option value="SIZE_DESC">Ukuran Terbesar</option>
           </select>
@@ -342,8 +344,12 @@
         return matchPlat && matchGenre && matchSearch;
       });
 
-      if (sortVal === 'AZ') {
+      if (sortVal === 'OLDEST') {
+        filtered.reverse();
+      } else if (sortVal === 'AZ') {
         filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+      } else if (sortVal === 'ZA') {
+        filtered.sort((a, b) => b.nama.localeCompare(a.nama));
       } else if (sortVal === 'SIZE_ASC') {
         filtered.sort((a, b) => parseSizeToGB(a.ukuran) - parseSizeToGB(b.ukuran));
       } else if (sortVal === 'SIZE_DESC') {
