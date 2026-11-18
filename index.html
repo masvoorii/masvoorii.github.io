@@ -3,145 +3,366 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nathan Game Palembang - Katalog Game</title>
+  <title>Katalog Game - Nathan Game Palembang</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-28">
 
-  <!-- Header -->
-  <header class="bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <!-- Logo & Nama Toko -->
-      <div class="flex items-center gap-3.5">
-        <img id="storeLogo" src="" alt="Nathan Game Palembang" 
-          onerror="this.style.display='none'"
-          class="w-12 h-12 rounded-xl object-cover bg-slate-800 border border-slate-700 shadow-md">
-        <div>
-          <h1 class="text-xl md:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-            NATHAN GAME PALEMBANG
-          </h1>
-          <p class="text-xs text-slate-400">Katalog Koleksi Game • Menampilkan <span id="gameCounter" class="text-white font-semibold">0</span> Game</p>
+  <!-- Header & Pencarian -->
+  <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="https://lh3.googleusercontent.com/d/1MpDNxzABV6F8dV2IeSeTfhkVSdh0wneT" alt="Nathan Game Palembang"
+            onerror="this.style.display='none'"
+            class="w-11 h-11 rounded-xl object-cover bg-slate-800 border border-slate-700 shrink-0">
+          <div>
+            <h1 class="text-lg md:text-xl font-bold text-blue-400 leading-tight">Nathan Game Palembang</h1>
+            <p class="text-xs text-slate-400">Pilih game favoritmu, cek total GB, & order langsung via WhatsApp</p>
+          </div>
+        </div>
+
+        <!-- Input Pencarian -->
+        <div class="relative w-full md:w-80">
+          <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Cari judul game..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+          <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
         </div>
       </div>
 
-      <!-- Search Bar -->
-      <div class="w-full md:w-80">
-        <input type="text" id="searchInput" placeholder="Cari judul game atau genre..."
-          class="w-full bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
-      </div>
-    </div>
+      <!-- Filter Platform & Genre -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-800/80">
+        <!-- Tab Platform Dinamis -->
+        <div id="platformFilters" class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          <button onclick="setPlatformFilter('ALL')" class="plat-btn active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">
+            Semua Platform
+          </button>
+        </div>
 
-    <!-- Filter Platform Dinamis -->
-    <div id="platformFilterBar" class="max-w-7xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto">
-      <button onclick="setFilter('ALL', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">Semua</button>
+        <!-- Dropdown Genre & Urutan -->
+        <div class="flex items-center gap-2 shrink-0">
+          <select id="genreFilter" onchange="applyFilters()"
+            class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="ALL">Semua Genre</option>
+          </select>
+          <select id="sortFilter" onchange="applyFilters()"
+            class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="NEWEST">Terbaru</option>
+            <option value="AZ">Judul A - Z</option>
+            <option value="SIZE_ASC">Ukuran Terkecil</option>
+            <option value="SIZE_DESC">Ukuran Terbesar</option>
+          </select>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- Grid Katalog -->
-  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
-    <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-      <div class="col-span-full text-center py-20 text-slate-500">Sedang memuat katalog game...</div>
+  <!-- Info Bar -->
+  <main class="max-w-6xl mx-auto px-4 pt-6">
+    <div class="flex justify-between items-center mb-4">
+      <p class="text-xs text-slate-400">Menampilkan <span id="shownCount" class="font-semibold text-slate-200">0</span> game</p>
+      <button id="btnClearCart" onclick="clearCart()" class="hidden text-xs text-red-400 hover:text-red-300">
+        Reset Pilihan (<span id="resetCount">0</span>)
+      </button>
+    </div>
+
+    <!-- Grid Katalog Game -->
+    <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <!-- Skeleton Loading -->
+      <div class="col-span-full py-16 text-center text-slate-400 text-sm">Memuat katalog game...</div>
     </div>
   </main>
 
-  <footer class="border-t border-slate-900 py-5 text-center text-xs text-slate-500">
-    &copy; 2026 Nathan Game Palembang. Semua hak cipta dilindungi.
-  </footer>
+  <!-- Floating Bar Keranjang WhatsApp (Muncul saat user memilih minimal 1 game) -->
+  <div id="cartBar" class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-700 shadow-2xl transform translate-y-full transition-transform duration-300">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+        <div>
+          <p class="text-xs text-slate-400">Game Dipilih</p>
+          <p class="text-sm font-bold text-white"><span id="selectedCount">0</span> Game</p>
+        </div>
+        <div class="h-8 w-px bg-slate-700"></div>
+        <div>
+          <p class="text-xs text-slate-400">Estimasi Total Storage</p>
+          <p class="text-sm font-bold text-emerald-400"><span id="totalSizeGB">0</span> GB</p>
+        </div>
+        <button onclick="toggleModalList()" class="text-xs text-blue-400 underline ml-2">
+          Lihat Daftar
+        </button>
+      </div>
+
+      <button onclick="checkoutWhatsApp()"
+        class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
+        <span>📲</span>
+        <span>Pesan via WhatsApp</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Detail Daftar Pilihan -->
+  <div id="cartModal" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+        <h3 class="font-bold text-base text-slate-100">Daftar Game Pilihanmu</h3>
+        <button onclick="toggleModalList()" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+      </div>
+      <div id="modalCartItems" class="max-h-64 overflow-y-auto space-y-2 text-xs mb-4 pr-1"></div>
+      <div class="flex justify-between items-center border-t border-slate-800 pt-3 mb-4 text-sm font-semibold">
+        <span>Total Kapasitas:</span>
+        <span class="text-emerald-400"><span id="modalTotalGB">0</span> GB</span>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="toggleModalList()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-semibold">
+          Tutup
+        </button>
+        <button onclick="checkoutWhatsApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-xs font-semibold text-white">
+          Kirim ke WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycby0Zg_fWuHMLJ-wPvpr-JiVuohn8moT6blKVr32uzGRrngAk0IGZpp8WUllovHrfCc9/exec";
-    const LOGO_URL = "https://lh3.googleusercontent.com/d/1MpDNxzABV6F8dV2IeSeTfhkVSdh0wneT";
-
-    document.getElementById('storeLogo').src = LOGO_URL;
 
     let allGames = [];
-    let currentPlatform = 'ALL';
+    let platforms = [];
+    let whatsappNumber = "6281200000000";
+    let selectedPlatform = "ALL";
+    let selectedGameIds = new Set();
 
-    // Pewarnaan badge otomatis (termasuk jika nanti tambah Xbox / Switch / PC)
-    function getBadgeStyle(platform) {
-      const p = platform.toUpperCase();
-      if (p.includes('PS5')) return 'bg-white text-slate-900';
-      if (p.includes('PS4')) return 'bg-blue-600 text-white';
-      if (p.includes('PS3')) return 'bg-slate-700 text-white';
-      if (p.includes('PS2')) return 'bg-indigo-700 text-white';
-      if (p.includes('XBOX')) return 'bg-emerald-600 text-white';
-      if (p.includes('SWITCH') || p.includes('NS') || p.includes('NINTENDO')) return 'bg-red-600 text-white';
-      return 'bg-cyan-600 text-white';
+    // Konversi string ukuran (misal "32.5 GB" atau "850 MB") ke angka GB
+    function parseSizeToGB(sizeStr) {
+      if (!sizeStr) return 0;
+      const str = sizeStr.toString().toUpperCase().replace(',', '.');
+      const num = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+      if (str.includes('MB')) return num / 1024;
+      return num;
     }
 
-    async function fetchCatalog() {
+    async function initCatalog() {
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
+
         allGames = (data.games || []).reverse();
-        const platforms = data.platforms || [];
+        platforms = data.platforms || [];
+        if (data.whatsapp) whatsappNumber = data.whatsapp.replace(/[^0-9]/g, '');
 
-        // Render tombol filter platform secara dinamis
-        const filterBar = document.getElementById('platformFilterBar');
-        filterBar.innerHTML = `<button onclick="setFilter('ALL', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">Semua</button>` +
-          platforms.map(p => `
-            <button onclick="setFilter('${p}', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap transition">
-              ${p}
-            </button>
-          `).join('');
-
-        renderGames();
-      } catch (e) {
+        renderPlatformTabs();
+        populateGenreDropdown();
+        applyFilters();
+      } catch (err) {
         document.getElementById('catalogGrid').innerHTML =
-          '<div class="col-span-full text-center py-20 text-red-400">Gagal memuat katalog. Periksa koneksi atau URL API.</div>';
+          '<div class="col-span-full py-16 text-center text-red-400 text-sm">Gagal memuat katalog. Silakan muat ulang halaman.</div>';
       }
     }
 
-    function setFilter(platform, btnElement) {
-      currentPlatform = platform;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white');
-        btn.classList.add('bg-slate-800', 'text-slate-300');
+    function renderPlatformTabs() {
+      const container = document.getElementById('platformFilters');
+      let html = `
+        <button onclick="setPlatformFilter('ALL')" data-plat="ALL"
+          class="plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap transition">
+          Semua (${allGames.length})
+        </button>
+      `;
+      platforms.forEach(p => {
+        const count = allGames.filter(g => g.platform === p).length;
+        html += `
+          <button onclick="setPlatformFilter('${p}')" data-plat="${p}"
+            class="plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">
+            ${p} (${count})
+          </button>
+        `;
       });
-      btnElement.classList.remove('bg-slate-800', 'text-slate-300');
-      btnElement.classList.add('bg-blue-600', 'text-white');
-      renderGames();
+      container.innerHTML = html;
     }
 
-    function renderGames() {
-      const keyword = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allGames.filter(g => {
-        const matchPlatform = currentPlatform === 'ALL' || g.platform === currentPlatform;
-        const matchSearch = g.nama.toLowerCase().includes(keyword) || g.genre.toLowerCase().includes(keyword);
-        return matchPlatform && matchSearch;
+    function populateGenreDropdown() {
+      const genreSet = new Set();
+      allGames.forEach(g => {
+        if (g.genre) {
+          g.genre.split(',').forEach(item => {
+            const clean = item.trim();
+            if (clean) genreSet.add(clean);
+          });
+        }
       });
 
-      document.getElementById('gameCounter').innerText = filtered.length;
-      const grid = document.getElementById('catalogGrid');
+      const select = document.getElementById('genreFilter');
+      Array.from(genreSet).sort().forEach(genre => {
+        select.innerHTML += `<option value="${genre}">${genre}</option>`;
+      });
+    }
 
-      if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-span-full text-center py-20 text-slate-500">Game tidak ditemukan.</div>';
+    function setPlatformFilter(plat) {
+      selectedPlatform = plat;
+      document.querySelectorAll('.plat-btn').forEach(btn => {
+        if (btn.dataset.plat === plat) {
+          btn.className = "plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap transition";
+        } else {
+          btn.className = "plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition";
+        }
+      });
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+      const genreVal = document.getElementById('genreFilter').value;
+      const sortVal = document.getElementById('sortFilter').value;
+
+      let filtered = allGames.filter(g => {
+        const matchPlat = selectedPlatform === 'ALL' || g.platform === selectedPlatform;
+        const matchGenre = genreVal === 'ALL' || (g.genre && g.genre.toLowerCase().includes(genreVal.toLowerCase()));
+        const matchSearch = g.nama.toLowerCase().includes(keyword) || (g.genre && g.genre.toLowerCase().includes(keyword));
+        return matchPlat && matchGenre && matchSearch;
+      });
+
+      if (sortVal === 'AZ') {
+        filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+      } else if (sortVal === 'SIZE_ASC') {
+        filtered.sort((a, b) => parseSizeToGB(a.ukuran) - parseSizeToGB(b.ukuran));
+      } else if (sortVal === 'SIZE_DESC') {
+        filtered.sort((a, b) => parseSizeToGB(b.ukuran) - parseSizeToGB(a.ukuran));
+      }
+
+      renderGrid(filtered);
+    }
+
+    function renderGrid(list) {
+      const grid = document.getElementById('catalogGrid');
+      document.getElementById('shownCount').innerText = list.length;
+
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 text-sm">Game tidak ditemukan. Coba kata kunci atau filter lain.</div>';
         return;
       }
 
-      grid.innerHTML = filtered.map(g => `
-        <div class="group bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-blue-500/60 transition duration-300 flex flex-col shadow-lg">
-          <div class="relative aspect-[3/4] overflow-hidden bg-slate-800">
-            <img src="${g.cover}" alt="${g.nama}" loading="lazy"
-              onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
-              class="w-full h-full object-fill group-hover:scale-105 transition duration-500">
-            <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded text-[11px] font-bold shadow ${getBadgeStyle(g.platform)}">
-              ${g.platform}
-            </span>
-            <span class="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 rounded bg-black/75 backdrop-blur-sm text-[11px] text-slate-200 font-medium">
-              ${g.ukuran}
-            </span>
+      grid.innerHTML = list.map(g => {
+        const isSelected = selectedGameIds.has(g.id);
+        return `
+          <div onclick="toggleGame('${g.id}')"
+            class="cursor-pointer group bg-slate-900 rounded-2xl overflow-hidden border transition-all duration-200 flex flex-col ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-800 hover:border-slate-600'}">
+            
+            <!-- Cover Poster (object-fill agar pas bingkai) -->
+            <div class="relative aspect-[3/4] w-full bg-slate-800 overflow-hidden">
+              <img src="${g.cover}" alt="${g.nama}" loading="lazy"
+                onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
+                class="w-full h-full object-fill group-hover:scale-105 transition-transform duration-300">
+              
+              <!-- Badge Platform -->
+              <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-950/85 text-blue-300 border border-slate-700/80 backdrop-blur-sm">
+                ${g.platform}
+              </span>
+
+              <!-- Badge Ukuran -->
+              <span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-950/85 text-slate-200 border border-slate-700/80 backdrop-blur-sm">
+                ${g.ukuran}
+              </span>
+
+              <!-- Indikator Terpilih -->
+              <div class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-950/70 text-slate-400 border border-slate-600'}">
+                ${isSelected ? '✓' : '+'}
+              </div>
+            </div>
+
+            <!-- Info Game -->
+            <div class="p-3 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-semibold text-xs sm:text-sm text-slate-100 line-clamp-2 leading-snug mb-1 group-hover:text-blue-400 transition">
+                  ${g.nama}
+                </h3>
+                <p class="text-[11px] text-slate-400 truncate">${g.genre}</p>
+              </div>
+              <div class="mt-3 pt-2 border-t border-slate-800/80 flex justify-between items-center">
+                <span class="text-[11px] font-medium ${isSelected ? 'text-emerald-400' : 'text-slate-400'}">
+                  ${isSelected ? 'Dipilih' : 'Klik untuk pilih'}
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="p-3.5 flex-1 flex flex-col justify-between">
-            <h3 class="font-bold text-sm text-slate-100 line-clamp-2 group-hover:text-blue-400 transition">${g.nama}</h3>
-            <p class="text-xs text-slate-400 mt-1.5 truncate">${g.genre}</p>
+        `;
+      }).join('');
+    }
+
+    function toggleGame(id) {
+      if (selectedGameIds.has(id)) {
+        selectedGameIds.delete(id);
+      } else {
+        selectedGameIds.add(id);
+      }
+      updateCartUI();
+      applyFilters();
+    }
+
+    function clearCart() {
+      selectedGameIds.clear();
+      updateCartUI();
+      applyFilters();
+    }
+
+    function updateCartUI() {
+      const count = selectedGameIds.size;
+      const bar = document.getElementById('cartBar');
+      const clearBtn = document.getElementById('btnClearCart');
+
+      let totalGB = 0;
+      const selectedItems = allGames.filter(g => selectedGameIds.has(g.id));
+      selectedItems.forEach(g => {
+        totalGB += parseSizeToGB(g.ukuran);
+      });
+
+      const formattedGB = totalGB.toFixed(1).replace('.0', '');
+      document.getElementById('selectedCount').innerText = count;
+      document.getElementById('resetCount').innerText = count;
+      document.getElementById('totalSizeGB').innerText = formattedGB;
+      document.getElementById('modalTotalGB').innerText = formattedGB;
+
+      if (count > 0) {
+        bar.classList.remove('translate-y-full');
+        clearBtn.classList.remove('hidden');
+      } else {
+        bar.classList.add('translate-y-full');
+        clearBtn.classList.add('hidden');
+        document.getElementById('cartModal').classList.add('hidden');
+      }
+
+      // Update isi modal
+      document.getElementById('modalCartItems').innerHTML = selectedItems.map((g, i) => `
+        <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+          <div class="pr-2">
+            <p class="font-semibold text-slate-200">${i + 1}. ${g.nama}</p>
+            <p class="text-[10px] text-slate-400">${g.platform} • ${g.ukuran}</p>
           </div>
+          <button onclick="toggleGame('${g.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold px-2">Hapus</button>
         </div>
       `).join('');
     }
 
-    document.getElementById('searchInput').addEventListener('input', renderGames);
-    fetchCatalog();
+    function toggleModalList() {
+      const modal = document.getElementById('cartModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function checkoutWhatsApp() {
+      const selectedItems = allGames.filter(g => selectedGameIds.has(g.id));
+      if (selectedItems.length === 0) return;
+
+      let totalGB = 0;
+      const listLines = selectedItems.map((g, idx) => {
+        totalGB += parseSizeToGB(g.ukuran);
+        return `${idx + 1}. ${g.nama} [${g.platform}] (${g.ukuran})`;
+      }).join('\n');
+
+      const formattedGB = totalGB.toFixed(1).replace('.0', '');
+      const text = `Halo *Nathan Game Palembang* 👋\nSaya mau order isi game dengan daftar berikut:\n\n${listLines}\n\n*Total Game:* ${selectedItems.length} Game\n*Estimasi Storage:* ~${formattedGB} GB\n\nMohon info jadwal/ketersediaannya ya min. Terima kasih!`;
+
+      const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    initCatalog();
   </script>
 </body>
 </html>
