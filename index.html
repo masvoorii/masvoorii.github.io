@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nathan Game Palembang - Katalog Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <!-- Logo & Nama Toko -->
+      <div class="flex items-center gap-3.5">
+        <img id="storeLogo" src="" alt="Nathan Game Palembang" 
+          onerror="this.style.display='none'"
+          class="w-12 h-12 rounded-xl object-cover bg-slate-800 border border-slate-700 shadow-md">
+        <div>
+          <h1 class="text-xl md:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+            NATHAN GAME PALEMBANG
+          </h1>
+          <p class="text-xs text-slate-400">Katalog Koleksi Game • Menampilkan <span id="gameCounter" class="text-white font-semibold">0</span> Game</p>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="w-full md:w-80">
+        <input type="text" id="searchInput" placeholder="Cari judul game atau genre..."
+          class="w-full bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+      </div>
+    </div>
+
+    <!-- Filter Platform Dinamis -->
+    <div id="platformFilterBar" class="max-w-7xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto">
+      <button onclick="setFilter('ALL', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">Semua</button>
+    </div>
+  </header>
+
+  <!-- Grid Katalog -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
+    <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+      <div class="col-span-full text-center py-20 text-slate-500">Sedang memuat katalog game...</div>
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-900 py-5 text-center text-xs text-slate-500">
+    &copy; 2026 Nathan Game Palembang. Semua hak cipta dilindungi.
+  </footer>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby0Zg_fWuHMLJ-wPvpr-JiVuohn8moT6blKVr32uzGRrngAk0IGZpp8WUllovHrfCc9/exec";
+    const LOGO_URL = "https://lh3.googleusercontent.com/d/1MpDNxzABV6F8dV2IeSeTfhkVSdh0wneT";
+
+    document.getElementById('storeLogo').src = LOGO_URL;
+
+    let allGames = [];
+    let currentPlatform = 'ALL';
+
+    // Pewarnaan badge otomatis (termasuk jika nanti tambah Xbox / Switch / PC)
+    function getBadgeStyle(platform) {
+      const p = platform.toUpperCase();
+      if (p.includes('PS5')) return 'bg-white text-slate-900';
+      if (p.includes('PS4')) return 'bg-blue-600 text-white';
+      if (p.includes('PS3')) return 'bg-slate-700 text-white';
+      if (p.includes('PS2')) return 'bg-indigo-700 text-white';
+      if (p.includes('XBOX')) return 'bg-emerald-600 text-white';
+      if (p.includes('SWITCH') || p.includes('NS') || p.includes('NINTENDO')) return 'bg-red-600 text-white';
+      return 'bg-cyan-600 text-white';
+    }
+
+    async function fetchCatalog() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        allGames = (data.games || []).reverse();
+        const platforms = data.platforms || [];
+
+        // Render tombol filter platform secara dinamis
+        const filterBar = document.getElementById('platformFilterBar');
+        filterBar.innerHTML = `<button onclick="setFilter('ALL', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">Semua</button>` +
+          platforms.map(p => `
+            <button onclick="setFilter('${p}', this)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap transition">
+              ${p}
+            </button>
+          `).join('');
+
+        renderGames();
+      } catch (e) {
+        document.getElementById('catalogGrid').innerHTML =
+          '<div class="col-span-full text-center py-20 text-red-400">Gagal memuat katalog. Periksa koneksi atau URL API.</div>';
+      }
+    }
+
+    function setFilter(platform, btnElement) {
+      currentPlatform = platform;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-300');
+      });
+      btnElement.classList.remove('bg-slate-800', 'text-slate-300');
+      btnElement.classList.add('bg-blue-600', 'text-white');
+      renderGames();
+    }
+
+    function renderGames() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allGames.filter(g => {
+        const matchPlatform = currentPlatform === 'ALL' || g.platform === currentPlatform;
+        const matchSearch = g.nama.toLowerCase().includes(keyword) || g.genre.toLowerCase().includes(keyword);
+        return matchPlatform && matchSearch;
+      });
+
+      document.getElementById('gameCounter').innerText = filtered.length;
+      const grid = document.getElementById('catalogGrid');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-20 text-slate-500">Game tidak ditemukan.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(g => `
+        <div class="group bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-blue-500/60 transition duration-300 flex flex-col shadow-lg">
+          <div class="relative aspect-[3/4] overflow-hidden bg-slate-800">
+            <img src="${g.cover}" alt="${g.nama}" loading="lazy"
+              onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
+              class="w-full h-full object-fill group-hover:scale-105 transition duration-500">
+            <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded text-[11px] font-bold shadow ${getBadgeStyle(g.platform)}">
+              ${g.platform}
+            </span>
+            <span class="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 rounded bg-black/75 backdrop-blur-sm text-[11px] text-slate-200 font-medium">
+              ${g.ukuran}
+            </span>
+          </div>
+          <div class="p-3.5 flex-1 flex flex-col justify-between">
+            <h3 class="font-bold text-sm text-slate-100 line-clamp-2 group-hover:text-blue-400 transition">${g.nama}</h3>
+            <p class="text-xs text-slate-400 mt-1.5 truncate">${g.genre}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderGames);
+    fetchCatalog();
+  </script>
+</body>
+</html>
