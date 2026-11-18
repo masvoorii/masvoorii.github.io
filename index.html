@@ -186,6 +186,75 @@
     let selectedGameIds = new Set();
     let synopsisCache = {}; // Menyimpan sinopsis agar tidak memuat ulang
 
+    // Kamus Singkatan & Alias Game Populer
+    const GAME_ALIASES = {
+      'gta': 'grand theft auto',
+      'gta 5': 'grand theft auto v',
+      'gta 4': 'grand theft auto iv',
+      'gta 3': 'grand theft auto iii',
+      'gta sa': 'grand theft auto san andreas',
+      'pes': 'pro evolution soccer efootball',
+      'efootball': 'pro evolution soccer efootball',
+      're': 'resident evil',
+      're2': 'resident evil 2',
+      're3': 'resident evil 3',
+      're4': 'resident evil 4',
+      're7': 'resident evil 7',
+      're8': 'resident evil village',
+      'gow': 'god of war',
+      'gow 3': 'god of war 3',
+      'rdr': 'red dead redemption',
+      'rdr2': 'red dead redemption 2',
+      'dmc': 'devil may cry',
+      'dmc 5': 'devil may cry 5',
+      'dmc 3': 'devil may cry 3',
+      'mk': 'mortal kombat',
+      'mk11': 'mortal kombat 11',
+      'ctr': 'crash team racing',
+      'nfs': 'need for speed',
+      'cod': 'call of duty',
+      'ac': 'assassin',
+      'ff': 'final fantasy',
+      'dbz': 'dragon ball',
+      'uns': 'ultimate ninja storm'
+    };
+
+    // Fungsi pencocokan cerdas (mendukung singkatan & potongan kata)
+    function isSmartMatch(gameTitle, gameGenre, rawKeyword) {
+      if (!rawKeyword) return true;
+      const titleLower = gameTitle.toLowerCase();
+      const genreLower = (gameGenre || '').toLowerCase();
+
+      // 1. Cek kecocokan langsung
+      if (titleLower.includes(rawKeyword) || genreLower.includes(rawKeyword)) return true;
+
+      // 2. Cek apakah keyword ada di kamus singkatan (misal: "gta 5" -> "grand theft auto v")
+      const expanded = GAME_ALIASES[rawKeyword];
+      if (expanded) {
+        const words = expanded.split(' ');
+        // Cocokkan jika semua kata kunci hasil terjemahan singkatan ada di judul game
+        if (words.every(w => titleLower.includes(w))) return true;
+        // Khusus PES / eFootball (cukup salah satu cocok)
+        if (rawKeyword === 'pes' || rawKeyword === 'efootball') {
+          if (titleLower.includes('pro evolution soccer') || titleLower.includes('efootball') || titleLower.includes('pes')) return true;
+        }
+      }
+
+      // 3. Ganti kata singkatan di dalam kalimat pencarian (misal ketik "gta san" -> "grand theft auto san")
+      let replacedKeyword = rawKeyword;
+      Object.keys(GAME_ALIASES).forEach(shortKey => {
+        const regex = new RegExp(`\\b${shortKey}\\b`, 'gi');
+        replacedKeyword = replacedKeyword.replace(regex, GAME_ALIASES[shortKey]);
+      });
+
+      if (replacedKeyword !== rawKeyword) {
+        const tokens = replacedKeyword.split(' ').filter(Boolean);
+        return tokens.every(t => titleLower.includes(t));
+      }
+
+      return false;
+    }
+    
     function parseSizeToGB(sizeStr) {
       if (!sizeStr) return 0;
       const str = sizeStr.toString().toUpperCase().replace(',', '.');
@@ -269,7 +338,7 @@
       let filtered = allGames.filter(g => {
         const matchPlat = selectedPlatform === 'ALL' || g.platform === selectedPlatform;
         const matchGenre = genreVal === 'ALL' || (g.genre && g.genre.toLowerCase().includes(genreVal.toLowerCase()));
-        const matchSearch = g.nama.toLowerCase().includes(keyword) || (g.genre && g.genre.toLowerCase().includes(keyword));
+        const matchSearch = isSmartMatch(g.nama, g.genre, keyword);
         return matchPlat && matchGenre && matchSearch;
       });
 
