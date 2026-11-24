@@ -22,7 +22,6 @@
           </div>
         </div>
 
-        <!-- Input Pencarian -->
         <div class="relative w-full md:w-80">
           <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Cari judul game (misal: GTA, PES, RE4)..."
             class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500">
@@ -30,16 +29,13 @@
         </div>
       </div>
 
-      <!-- Filter Platform, Genre & Sort By -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-800/80">
-        <!-- Tab Platform Dinamis -->
         <div id="platformFilters" class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           <button onclick="setPlatformFilter('ALL')" class="plat-btn active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">
             Semua Platform
           </button>
         </div>
 
-        <!-- Dropdown Genre & Urutan Lengkap -->
         <div class="flex items-center gap-2 shrink-0">
           <select id="genreFilter" onchange="applyFilters()"
             class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
@@ -68,7 +64,6 @@
       </button>
     </div>
 
-    <!-- Grid Katalog Game -->
     <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       <div class="col-span-full py-16 text-center text-slate-400 text-sm">Memuat katalog game...</div>
     </div>
@@ -185,7 +180,6 @@
     let selectedGameIds = new Set();
     let synopsisCache = {};
 
-    // Kamus Singkatan & Alias Game Populer
     const GAME_ALIASES = {
       'gta': 'grand theft auto',
       'gta 5': 'grand theft auto v',
@@ -296,7 +290,7 @@
       const genreSet = new Set();
       allGames.forEach(g => {
         if (g.genre) {
-          g.genre.split(',').forEach(item => {
+          String(g.genre).split(',').forEach(item => {
             const clean = item.trim();
             if (clean) genreSet.add(clean);
           });
@@ -328,17 +322,17 @@
 
       let filtered = allGames.filter(g => {
         const matchPlat = selectedPlatform === 'ALL' || g.platform === selectedPlatform;
-        const matchGenre = genreVal === 'ALL' || (g.genre && g.genre.toLowerCase().includes(genreVal.toLowerCase()));
-        const matchSearch = isSmartMatch(g.nama, g.genre, keyword);
+        const matchGenre = genreVal === 'ALL' || String(g.genre || '').toLowerCase().includes(genreVal.toLowerCase());
+        const matchSearch = isSmartMatch(String(g.nama || ''), String(g.genre || ''), keyword);
         return matchPlat && matchGenre && matchSearch;
       });
 
       if (sortVal === 'OLDEST') {
-        filtered.reverse();
+        filtered = [...filtered].reverse();
       } else if (sortVal === 'AZ') {
-        filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+        filtered.sort((a, b) => String(a.nama).localeCompare(String(b.nama)));
       } else if (sortVal === 'ZA') {
-        filtered.sort((a, b) => b.nama.localeCompare(a.nama));
+        filtered.sort((a, b) => String(b.nama).localeCompare(String(a.nama)));
       } else if (sortVal === 'SIZE_ASC') {
         filtered.sort((a, b) => parseSizeToGB(a.ukuran) - parseSizeToGB(b.ukuran));
       } else if (sortVal === 'SIZE_DESC') {
@@ -363,23 +357,19 @@
           <div onclick="openGameDetail('${g.id}')"
             class="cursor-pointer group bg-slate-900 rounded-2xl overflow-hidden border transition-all duration-200 flex flex-col ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-800 hover:border-slate-600'}">
             
-            <!-- Cover Poster -->
             <div class="relative aspect-[3/4] w-full bg-slate-800 overflow-hidden">
               <img src="${g.cover}" alt="${g.nama}" loading="lazy"
                 onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
                 class="w-full h-full object-fill group-hover:scale-105 transition-transform duration-300">
               
-              <!-- Badge Platform -->
               <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-950/85 text-blue-300 border border-slate-700/80 backdrop-blur-sm">
                 ${g.platform}
               </span>
 
-              <!-- Badge Ukuran -->
               <span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-950/85 text-slate-200 border border-slate-700/80 backdrop-blur-sm">
                 ${g.ukuran}
               </span>
 
-              <!-- Tombol Pilih Cepat (+ / ✓) -->
               <button type="button" onclick="event.stopPropagation(); toggleGame('${g.id}')"
                 title="${isSelected ? 'Batalkan pilihan' : 'Pilih game ini'}"
                 class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md transition ${isSelected ? 'bg-emerald-500 text-slate-950 scale-110' : 'bg-slate-950/80 hover:bg-blue-600 text-slate-200 border border-slate-600'}">
@@ -387,7 +377,6 @@
               </button>
             </div>
 
-            <!-- Info Game -->
             <div class="p-3 flex-1 flex flex-col justify-between">
               <div>
                 <h3 class="font-semibold text-xs sm:text-sm text-slate-100 line-clamp-2 leading-snug mb-1 group-hover:text-blue-400 transition">
@@ -405,7 +394,6 @@
       }).join('');
     }
 
-    // Buka Modal Sinopsis Game (Terkunci Akurat ke Entitas Game + Bahasa Indonesia)
     async function openGameDetail(id) {
       const game = allGames.find(g => g.id == id);
       if (!game) return;
@@ -426,10 +414,9 @@
       }
 
       synEl.innerText = 'Memuat sinopsis dalam Bahasa Indonesia...';
-      const cleanTitle = game.nama.replace(/\s*\(.*?\)\s*/g, '').trim();
+      const cleanTitle = String(game.nama || '').replace(/\s*\(.*?\)\s*/g, '').trim();
 
       try {
-        // 1. Kunci entitas pasti gamenya lewat Wikidata agar tidak salah sasaran
         const wdSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(cleanTitle)}&language=en&limit=5&format=json&origin=*`;
         const wdRes = await fetch(wdSearchUrl);
         const wdData = await wdRes.json();
@@ -452,7 +439,6 @@
           if (sitelinks.enwiki) enWikiTitle = sitelinks.enwiki.title;
         }
 
-        // 2. Ambil artikel Wikipedia Bahasa Indonesia jika tersedia
         if (idWikiTitle) {
           const idUrl = `https://id.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(idWikiTitle)}&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
           const idRes = await fetch(idUrl);
@@ -466,7 +452,6 @@
           }
         }
 
-        // 3. Jika belum ada di Wiki ID, tarik dari artikel resmi Wiki Inggris lalu terjemahkan ke Bahasa Indonesia
         const enUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(enWikiTitle)}&redirects=1&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
         const enRes = await fetch(enUrl);
         const enData = await enRes.json();
