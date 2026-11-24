@@ -37,7 +37,7 @@ Since this is a self-contained static web application with zero build dependenci
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/masvoorii/masvoorii.github.io.git](https://github.com/masvoorii/masvoorii.github.io.git)
+   git clone https://github.com/masvoorii/masvoorii.github.io.git
    cd masvoorii.github.io
    ```
 
