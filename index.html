@@ -1,98 +1,606 @@
-<div align="center">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog Game - Nathan Game Palembang</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-28">
 
-<!-- Animated Typing Header -->
-<a href="https://github.com/masvoorii">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=26&duration=3000&pause=1000&color=38BDF8&center=true&vCenter=true&width=700&lines=Hi+there%2C+I'm+Fachri!+%F0%9F%91%8B;Electrical+Engineering+Undergrad+%40+UNSRI;Control%2C+Automation+%26+Embedded+Enthusiast;Full-Stack+Web+%26+IoT+Builder" alt="Typing SVG" />
-</a>
+  <!-- Header & Pencarian -->
+  <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 py-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="https://lh3.googleusercontent.com/d/1MpDNxzABV6F8dV2IeSeTfhkVSdh0wneT" alt="Nathan Game Palembang"
+            onerror="this.style.display='none'"
+            class="w-11 h-11 rounded-xl object-cover bg-slate-800 border border-slate-700 shrink-0">
+          <div>
+            <h1 class="text-lg md:text-xl font-bold text-blue-400 leading-tight">Nathan Game Palembang</h1>
+            <p class="text-xs text-slate-400">Katalog Game Resmi • Palembang</p>
+          </div>
+        </div>
 
-**Control & Computer Engineering Student • PLC Lab Assistant • Web & Embedded Systems Developer**
+        <!-- Input Pencarian -->
+        <div class="relative w-full md:w-80">
+          <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Cari judul game (misal: GTA, PES, RE4)..."
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+          <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+        </div>
+      </div>
 
-[![Email](https://img.shields.io/badge/Email-fachrips2007%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:fachrips2007@gmail.com)
-[![Instagram](https://img.shields.io/badge/Instagram-%40fahrifran-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/fahrifran)
+      <!-- Filter Platform, Genre & Sort By -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-800/80">
+        <!-- Tab Platform Dinamis -->
+        <div id="platformFilters" class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          <button onclick="setPlatformFilter('ALL')" class="plat-btn active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap">
+            Semua Platform
+          </button>
+        </div>
 
-</div>
+        <!-- Dropdown Genre & Urutan Lengkap -->
+        <div class="flex items-center gap-2 shrink-0">
+          <select id="genreFilter" onchange="applyFilters()"
+            class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="ALL">Semua Genre</option>
+          </select>
+          <select id="sortFilter" onchange="applyFilters()"
+            class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="NEWEST">Terbaru Ditambahkan</option>
+            <option value="OLDEST">Terlama</option>
+            <option value="AZ">Judul A - Z</option>
+            <option value="ZA">Judul Z - A</option>
+            <option value="SIZE_ASC">Ukuran Terkecil</option>
+            <option value="SIZE_DESC">Ukuran Terbesar</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
 
----
+  <!-- Info Bar -->
+  <main class="max-w-6xl mx-auto px-4 pt-6">
+    <div class="flex justify-between items-center mb-4">
+      <p class="text-xs text-slate-400">Menampilkan <span id="shownCount" class="font-semibold text-slate-200">0</span> game</p>
+      <button id="btnClearCart" onclick="clearCart()" class="hidden text-xs text-red-400 hover:text-red-300">
+        Reset Pilihan (<span id="resetCount">0</span>)
+      </button>
+    </div>
 
-### 👨‍💻 About Me
+    <!-- Grid Katalog Game -->
+    <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div class="col-span-full py-16 text-center text-slate-400 text-sm">Memuat katalog game...</div>
+    </div>
+  </main>
 
-I'm **Fachri Pranedya**, a 5th-semester **Electrical Engineering** undergraduate at **Universitas Sriwijaya (UNSRI)** specializing in **Control & Computer Engineering**. My passion lies at the intersection of hardware and software—designing microcontroller prototypes, configuring industrial PLC workflows, and building clean web platforms.
+  <!-- Tombol WhatsApp Melayang di Pojok Kanan Bawah -->
+  <a id="floatingWaBtn" href="#" target="_blank" onclick="openGeneralWA(event)"
+    title="Chat WhatsApp Nathan Game Palembang"
+    class="fixed right-5 bottom-5 z-30 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-full shadow-lg shadow-emerald-950/60 flex items-center gap-2 transition-all duration-300 hover:scale-105">
+    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/>
+    </svg>
+    <span class="text-xs font-semibold hidden sm:inline">Chat Admin</span>
+  </a>
 
-- 🔭 **Currently working on:** Embedded IoT prototypes (ESP32 & sensor arrays), PLC automation lab modules, and web-based catalog systems.
-- 🌱 **Currently learning:** Advanced control systems, computer vision applications, and scalable backend architectures.
-- 🧑‍🏫 **Academic & Teaching Roles:**
-  - **Laboratory Assistant** — Programmable Logic Controllers (PLC) Lab, UNSRI
-  - **Teaching Assistant** — Basic Computer Programming (*Dasar Komputer & Pemrograman*) & Basic Information Systems (*Dasar Sistem Informasi*)
-  - **Guest Instructor** — Taught 10th-grade *Coding & Artificial Intelligence (KKA)* as an alumnus mentor
-- 🏆 **Achievements & Certifications:**
-  - **Presenter & Author** — 18th AVoER National Seminar (Universitas Sriwijaya)
-  - **Completer** — Kumon Mathematics & English as a Foreign Language (EFL) Programs
+  <!-- Floating Bar Keranjang WhatsApp -->
+  <div id="cartBar" class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-700 shadow-2xl transform translate-y-full transition-transform duration-300">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+        <div>
+          <p class="text-xs text-slate-400">Game Dipilih</p>
+          <p class="text-sm font-bold text-white"><span id="selectedCount">0</span> Game</p>
+        </div>
+        <div class="h-8 w-px bg-slate-700"></div>
+        <div>
+          <p class="text-xs text-slate-400">Estimasi Total Storage</p>
+          <p class="text-sm font-bold text-emerald-400"><span id="totalSizeGB">0</span> GB</p>
+        </div>
+        <button onclick="toggleModalList()" class="text-xs text-blue-400 underline ml-2">
+          Lihat Daftar
+        </button>
+      </div>
 
----
+      <button onclick="checkoutWhatsApp()"
+        class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition">
+        <span>📲</span>
+        <span>Kirim Daftar ke WhatsApp</span>
+      </button>
+    </div>
+  </div>
 
-### 🛠️ Tech Stack & Simulation Tools
+  <!-- Modal Detail & Sinopsis Game -->
+  <div id="detailModal" onclick="if(event.target === this) closeDetailModal()"
+    class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="flex flex-col sm:flex-row gap-4 p-5">
+        <img id="detailCover" src="" alt="Cover"
+          onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
+          class="w-32 h-44 sm:w-36 sm:h-48 object-fill rounded-xl bg-slate-800 border border-slate-700 mx-auto sm:mx-0 shrink-0 shadow-md">
+        
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start gap-2">
+              <h3 id="detailTitle" class="font-bold text-base sm:text-lg text-white leading-snug">Judul Game</h3>
+              <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl font-bold leading-none">&times;</button>
+            </div>
+            
+            <div class="flex flex-wrap gap-1.5 mt-2 mb-3">
+              <span id="detailPlatform" class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300">PS4</span>
+              <span id="detailSize" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-200">0 GB</span>
+              <span id="detailGenre" class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-400">Genre</span>
+            </div>
 
-<div align="center">
+            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 max-h-36 overflow-y-auto">
+              <p class="text-[11px] font-semibold text-slate-400 mb-1">Sinopsis / Tentang Game:</p>
+              <p id="detailSynopsis" class="text-xs text-slate-300 leading-relaxed">Memuat sinopsis game...</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-**Embedded Systems, Hardware & Simulation**
-<br>
-![ESP32](https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white)
-![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)
-![PLC](https://img.shields.io/badge/PLC_Automation-00599C?style=for-the-badge&logo=siemens&logoColor=white)
-![Wokwi](https://img.shields.io/badge/Wokwi_Simulator-1E293B?style=for-the-badge&logo=dependabot&logoColor=38BDF8)
+      <div class="bg-slate-950/80 px-5 py-3.5 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeDetailModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300">
+          Tutup
+        </button>
+        <button id="detailSelectBtn" onclick="" class="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+          + Pilih Game Ini
+        </button>
+      </div>
+    </div>
+  </div>
 
-**Languages & Web Frameworks**
-<br>
-![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+  <!-- Modal Detail Daftar Pilihan Keranjang -->
+  <div id="cartModal" onclick="if(event.target === this) toggleModalList()"
+    class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+        <h3 class="font-bold text-base text-slate-100">Daftar Game Pilihanmu</h3>
+        <button onclick="toggleModalList()" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+      </div>
+      <div id="modalCartItems" class="max-h-64 overflow-y-auto space-y-2 text-xs mb-4 pr-1"></div>
+      <div class="flex justify-between items-center border-t border-slate-800 pt-3 mb-4 text-sm font-semibold">
+        <span>Total Kapasitas:</span>
+        <span class="text-emerald-400"><span id="modalTotalGB">0</span> GB</span>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="toggleModalList()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-semibold">
+          Tutup
+        </button>
+        <button onclick="checkoutWhatsApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-xs font-semibold text-white">
+          Kirim ke WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
 
-**Databases, Hosting & Dev Tools**
-<br>
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
-![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-222222?style=for-the-badge&logo=githubpages&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby0Zg_fWuHMLJ-wPvpr-JiVuohn8moT6blKVr32uzGRrngAk0IGZpp8WUllovHrfCc9/exec";
 
-</div>
+    let allGames = [];
+    let platforms = [];
+    let whatsappNumber = "6281200000000";
+    let selectedPlatform = "ALL";
+    let selectedGameIds = new Set();
+    let synopsisCache = {};
 
----
+    // Kamus Singkatan & Alias Game Populer
+    const GAME_ALIASES = {
+      'gta': 'grand theft auto',
+      'gta 5': 'grand theft auto v',
+      'gta 4': 'grand theft auto iv',
+      'gta 3': 'grand theft auto iii',
+      'gta sa': 'grand theft auto san andreas',
+      'pes': 'pro evolution soccer efootball',
+      'efootball': 'pro evolution soccer efootball',
+      're': 'resident evil',
+      're2': 'resident evil 2',
+      're3': 'resident evil 3',
+      're4': 'resident evil 4',
+      're7': 'resident evil 7',
+      're8': 'resident evil village',
+      'gow': 'god of war',
+      'gow 3': 'god of war 3',
+      'rdr': 'red dead redemption',
+      'rdr2': 'red dead redemption 2',
+      'dmc': 'devil may cry',
+      'dmc 5': 'devil may cry 5',
+      'dmc 3': 'devil may cry 3',
+      'mk': 'mortal kombat',
+      'mk11': 'mortal kombat 11',
+      'ctr': 'crash team racing',
+      'nfs': 'need for speed',
+      'cod': 'call of duty',
+      'ac': 'assassin',
+      'ff': 'final fantasy',
+      'dbz': 'dragon ball',
+      'uns': 'ultimate ninja storm'
+    };
 
-### 🚀 Featured Projects & Research
+    function isSmartMatch(gameTitle, gameGenre, rawKeyword) {
+      if (!rawKeyword) return true;
+      const titleLower = gameTitle.toLowerCase();
+      const genreLower = (gameGenre || '').toLowerCase();
 
-| Project / Publication | Description | Tech Stack / Focus |
-| :--- | :--- | :--- |
-| **[Nathan Game Palembang Web Catalog](https://masvoorii.github.io)** | Live web-based game catalog, storage estimator, and inventory showcase built for a local PlayStation 4 game installation business. | `HTML/CSS` • `JavaScript` • `GitHub Pages` |
-| **Solar Energy Utilization for Water Tourism** | Peer-reviewed research paper (*ID 3584*) presented at the 18th AVoER National Seminar on implementing solar PV systems in Tanjung Pinang II Village, Ogan Ilir. | `Solar PV` • `Renewable Energy` • `System Design` |
-| **Interactive Hand-Tracking Filter** | Real-time computer vision gesture filter tailored for left-handed dominant tracking and low-latency camera feedback. | `Python` • `Computer Vision` • `Hand Tracking` |
-| **ESP32 Sensor & Automation Prototypes** | Collection of microcontroller experiments integrating ultrasonic distance sensors (`HC-SR04`), circuit simulations, and control logic. | `ESP32` • `C++` • `Wokwi` • `Sensors` |
+      if (titleLower.includes(rawKeyword) || genreLower.includes(rawKeyword)) return true;
 
----
+      const expanded = GAME_ALIASES[rawKeyword];
+      if (expanded) {
+        if (rawKeyword === 'pes' || rawKeyword === 'efootball') {
+          return titleLower.includes('pro evolution soccer') || titleLower.includes('efootball') || titleLower.includes('pes');
+        }
+        return expanded.split(' ').every(w => titleLower.includes(w));
+      }
 
-### 🏛️ Leadership & Organizational Experience
+      let replacedKeyword = rawKeyword;
+      Object.keys(GAME_ALIASES).forEach(shortKey => {
+        const regex = new RegExp(`\\b${shortKey}\\b`, 'gi');
+        replacedKeyword = replacedKeyword.replace(regex, GAME_ALIASES[shortKey]);
+      });
 
-- **Student Executive Board of Universitas Sriwijaya (BEM UNSRI)** — *Expert Staff (Staf Ahli), Creative Economy Bureau*
-- **Student Executive Board of Faculty of Engineering (BEM FT UNSRI)** — *Executive Board Member (Badan Pengurus), Academic & Professionalism Department*
-- **Electrical Engineering Student Association (HME UNSRI)** — *Expert Staff (Staf Ahli), Institutional Relations Department*
-- **PKKMB FT & Electrical Engineering UNSRI** — *Student Coordinator & Group Mentor (Kakak Gugus)* for freshman orientation
-- **High School Robotics Club** — *President (Ketua Umum)*, leading microcontroller workshops and robotics competitions
+      if (replacedKeyword !== rawKeyword) {
+        return replacedKeyword.split(' ').filter(Boolean).every(t => titleLower.includes(t));
+      }
 
----
+      return false;
+    }
 
-### 📊 GitHub Analytics
+    function parseSizeToGB(sizeStr) {
+      if (!sizeStr) return 0;
+      const str = sizeStr.toString().toUpperCase().replace(',', '.');
+      const num = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+      if (str.includes('MB')) return num / 1024;
+      return num;
+    }
 
-<div align="center">
-  <img height="170em" src="https://github-readme-stats.vercel.app/api?username=masvoorii&show_icons=true&theme=transparent&hide_border=true&title_color=38BDF8&icon_color=38BDF8&text_color=94A3B8" alt="masvoorii's GitHub Stats" />
-  <img height="170em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=masvoorii&layout=compact&theme=transparent&hide_border=true&title_color=38BDF8&text_color=94A3B8" alt="Top Languages" />
-</div>
+    async function initCatalog() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
 
----
+        allGames = (data.games || []).reverse();
+        platforms = data.platforms || [];
+        if (data.whatsapp) whatsappNumber = data.whatsapp.replace(/[^0-9]/g, '');
 
-### ⚡ Fun Facts & Beyond Code
+        renderPlatformTabs();
+        populateGenreDropdown();
+        applyFilters();
+      } catch (err) {
+        document.getElementById('catalogGrid').innerHTML =
+          '<div class="col-span-full py-16 text-center text-red-400 text-sm">Gagal memuat katalog. Silakan muat ulang halaman.</div>';
+      }
+    }
 
-- 🎮 **Entrepreneur on the Side:** Founder & operator of *Nathan Game Palembang*, managing multi-terabyte game libraries and console setups alongside engineering coursework.
-- ✍️ **Left-Handed Maker:** Southpaw engineer who loves optimizing hardware enclosures, multi-drive storage setups, and clean desk workflows.
-- 🤖 **Robotics Roots:** Started tinkering with sensors and logic gates in high school before diving deep into industrial PLCs and control systems.
+    function renderPlatformTabs() {
+      const container = document.getElementById('platformFilters');
+      let html = `
+        <button onclick="setPlatformFilter('ALL')" data-plat="ALL"
+          class="plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap transition">
+          Semua (${allGames.length})
+        </button>
+      `;
+      platforms.forEach(p => {
+        const count = allGames.filter(g => g.platform === p).length;
+        html += `
+          <button onclick="setPlatformFilter('${p}')" data-plat="${p}"
+            class="plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">
+            ${p} (${count})
+          </button>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function populateGenreDropdown() {
+      const genreSet = new Set();
+      allGames.forEach(g => {
+        if (g.genre) {
+          g.genre.split(',').forEach(item => {
+            const clean = item.trim();
+            if (clean) genreSet.add(clean);
+          });
+        }
+      });
+
+      const select = document.getElementById('genreFilter');
+      Array.from(genreSet).sort().forEach(genre => {
+        select.innerHTML += `<option value="${genre}">${genre}</option>`;
+      });
+    }
+
+    function setPlatformFilter(plat) {
+      selectedPlatform = plat;
+      document.querySelectorAll('.plat-btn').forEach(btn => {
+        if (btn.dataset.plat === plat) {
+          btn.className = "plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white whitespace-nowrap transition";
+        } else {
+          btn.className = "plat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition";
+        }
+      });
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+      const genreVal = document.getElementById('genreFilter').value;
+      const sortVal = document.getElementById('sortFilter').value;
+
+      let filtered = allGames.filter(g => {
+        const matchPlat = selectedPlatform === 'ALL' || g.platform === selectedPlatform;
+        const matchGenre = genreVal === 'ALL' || (g.genre && g.genre.toLowerCase().includes(genreVal.toLowerCase()));
+        const matchSearch = isSmartMatch(g.nama, g.genre, keyword);
+        return matchPlat && matchGenre && matchSearch;
+      });
+
+      if (sortVal === 'OLDEST') {
+        filtered.reverse();
+      } else if (sortVal === 'AZ') {
+        filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+      } else if (sortVal === 'ZA') {
+        filtered.sort((a, b) => b.nama.localeCompare(a.nama));
+      } else if (sortVal === 'SIZE_ASC') {
+        filtered.sort((a, b) => parseSizeToGB(a.ukuran) - parseSizeToGB(b.ukuran));
+      } else if (sortVal === 'SIZE_DESC') {
+        filtered.sort((a, b) => parseSizeToGB(b.ukuran) - parseSizeToGB(a.ukuran));
+      }
+
+      renderGrid(filtered);
+    }
+
+    function renderGrid(list) {
+      const grid = document.getElementById('catalogGrid');
+      document.getElementById('shownCount').innerText = list.length;
+
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 text-sm">Game tidak ditemukan. Coba kata kunci atau filter lain.</div>';
+        return;
+      }
+
+      grid.innerHTML = list.map(g => {
+        const isSelected = selectedGameIds.has(g.id);
+        return `
+          <div onclick="openGameDetail('${g.id}')"
+            class="cursor-pointer group bg-slate-900 rounded-2xl overflow-hidden border transition-all duration-200 flex flex-col ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-800 hover:border-slate-600'}">
+            
+            <!-- Cover Poster -->
+            <div class="relative aspect-[3/4] w-full bg-slate-800 overflow-hidden">
+              <img src="${g.cover}" alt="${g.nama}" loading="lazy"
+                onerror="this.src='https://placehold.co/300x400/1e293b/94a3b8?text=No+Cover'"
+                class="w-full h-full object-fill group-hover:scale-105 transition-transform duration-300">
+              
+              <!-- Badge Platform -->
+              <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-950/85 text-blue-300 border border-slate-700/80 backdrop-blur-sm">
+                ${g.platform}
+              </span>
+
+              <!-- Badge Ukuran -->
+              <span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-950/85 text-slate-200 border border-slate-700/80 backdrop-blur-sm">
+                ${g.ukuran}
+              </span>
+
+              <!-- Tombol Pilih Cepat (+ / ✓) -->
+              <button type="button" onclick="event.stopPropagation(); toggleGame('${g.id}')"
+                title="${isSelected ? 'Batalkan pilihan' : 'Pilih game ini'}"
+                class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-md transition ${isSelected ? 'bg-emerald-500 text-slate-950 scale-110' : 'bg-slate-950/80 hover:bg-blue-600 text-slate-200 border border-slate-600'}">
+                ${isSelected ? '✓' : '+'}
+              </button>
+            </div>
+
+            <!-- Info Game -->
+            <div class="p-3 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-semibold text-xs sm:text-sm text-slate-100 line-clamp-2 leading-snug mb-1 group-hover:text-blue-400 transition">
+                  ${g.nama}
+                </h3>
+                <p class="text-[11px] text-slate-400 truncate">${g.genre}</p>
+              </div>
+              <div class="mt-3 pt-2 border-t border-slate-800/80 flex justify-between items-center">
+                <span class="text-[11px] text-blue-400/90 group-hover:underline">Lihat sinopsis</span>
+                ${isSelected ? '<span class="text-[10px] font-bold text-emerald-400">Terpilih</span>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Buka Modal Sinopsis Game (Terkunci Akurat ke Entitas Game + Bahasa Indonesia)
+    async function openGameDetail(id) {
+      const game = allGames.find(g => g.id == id);
+      if (!game) return;
+
+      document.getElementById('detailCover').src = game.cover;
+      document.getElementById('detailTitle').innerText = game.nama;
+      document.getElementById('detailPlatform').innerText = game.platform;
+      document.getElementById('detailSize').innerText = game.ukuran;
+      document.getElementById('detailGenre').innerText = game.genre;
+
+      updateDetailModalButton(game.id);
+      document.getElementById('detailModal').classList.remove('hidden');
+
+      const synEl = document.getElementById('detailSynopsis');
+      if (synopsisCache[game.id]) {
+        synEl.innerText = synopsisCache[game.id];
+        return;
+      }
+
+      synEl.innerText = 'Memuat sinopsis dalam Bahasa Indonesia...';
+      const cleanTitle = game.nama.replace(/\s*\(.*?\)\s*/g, '').trim();
+
+      try {
+        // 1. Kunci entitas pasti gamenya lewat Wikidata agar tidak salah sasaran
+        const wdSearchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(cleanTitle)}&language=en&limit=5&format=json&origin=*`;
+        const wdRes = await fetch(wdSearchUrl);
+        const wdData = await wdRes.json();
+
+        let targetEntity = (wdData.search || []).find(item => {
+          const desc = (item.description || '').toLowerCase();
+          return desc.includes('video game') || desc.includes('game');
+        }) || (wdData.search || [])[0];
+
+        let idWikiTitle = '';
+        let enWikiTitle = cleanTitle;
+
+        if (targetEntity) {
+          const detailUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${targetEntity.id}&props=sitelinks&sitefilter=idwiki|enwiki&format=json&origin=*`;
+          const detailRes = await fetch(detailUrl);
+          const detailData = await detailRes.json();
+          const sitelinks = detailData.entities?.[targetEntity.id]?.sitelinks || {};
+
+          if (sitelinks.idwiki) idWikiTitle = sitelinks.idwiki.title;
+          if (sitelinks.enwiki) enWikiTitle = sitelinks.enwiki.title;
+        }
+
+        // 2. Ambil artikel Wikipedia Bahasa Indonesia jika tersedia
+        if (idWikiTitle) {
+          const idUrl = `https://id.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(idWikiTitle)}&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
+          const idRes = await fetch(idUrl);
+          const idData = await idRes.json();
+          const idPages = idData.query?.pages ? Object.values(idData.query.pages) : [];
+
+          if (idPages.length > 0 && idPages[0].extract && idPages[0].extract.length > 60) {
+            synopsisCache[game.id] = idPages[0].extract;
+            synEl.innerText = idPages[0].extract;
+            return;
+          }
+        }
+
+        // 3. Jika belum ada di Wiki ID, tarik dari artikel resmi Wiki Inggris lalu terjemahkan ke Bahasa Indonesia
+        const enUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(enWikiTitle)}&redirects=1&prop=extracts&exintro=1&explaintext=1&exsentences=4&format=json&origin=*`;
+        const enRes = await fetch(enUrl);
+        const enData = await enRes.json();
+        const enPages = enData.query?.pages ? Object.values(enData.query.pages) : [];
+
+        if (enPages.length > 0 && enPages[0].extract) {
+          const enText = enPages[0].extract;
+          try {
+            const trUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=id&dt=t&q=${encodeURIComponent(enText)}`;
+            const trRes = await fetch(trUrl);
+            const trData = await trRes.json();
+            const translatedText = trData[0].map(item => item[0]).join('');
+
+            synopsisCache[game.id] = translatedText;
+            synEl.innerText = translatedText;
+          } catch (trErr) {
+            synopsisCache[game.id] = enText;
+            synEl.innerText = enText;
+          }
+        } else {
+          const fallbackText = `${game.nama} adalah game bergenre ${game.genre} untuk konsol ${game.platform} dengan ukuran file ${game.ukuran}.`;
+          synopsisCache[game.id] = fallbackText;
+          synEl.innerText = fallbackText;
+        }
+      } catch (err) {
+        synEl.innerText = `${game.nama} (${game.platform}) • Genre: ${game.genre} • Ukuran: ${game.ukuran}.`;
+      }
+    }
+
+    function updateDetailModalButton(id) {
+      const btn = document.getElementById('detailSelectBtn');
+      const isSelected = selectedGameIds.has(id);
+      if (isSelected) {
+        btn.innerText = '✓ Sudah Dipilih (Klik untuk Batal)';
+        btn.className = 'px-5 py-2 rounded-xl text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition';
+      } else {
+        btn.innerText = '+ Pilih Game Ini';
+        btn.className = 'px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition';
+      }
+      btn.onclick = function() {
+        toggleGame(id);
+        updateDetailModalButton(id);
+      };
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    function toggleGame(id) {
+      if (selectedGameIds.has(id)) {
+        selectedGameIds.delete(id);
+      } else {
+        selectedGameIds.add(id);
+      }
+      updateCartUI();
+      applyFilters();
+    }
+
+    function clearCart() {
+      selectedGameIds.clear();
+      updateCartUI();
+      applyFilters();
+    }
+
+    function updateCartUI() {
+      const count = selectedGameIds.size;
+      const bar = document.getElementById('cartBar');
+      const clearBtn = document.getElementById('btnClearCart');
+      const waFloat = document.getElementById('floatingWaBtn');
+
+      let totalGB = 0;
+      const selectedItems = allGames.filter(g => selectedGameIds.has(g.id));
+      selectedItems.forEach(g => {
+        totalGB += parseSizeToGB(g.ukuran);
+      });
+
+      const formattedGB = totalGB.toFixed(1).replace('.0', '');
+      document.getElementById('selectedCount').innerText = count;
+      document.getElementById('resetCount').innerText = count;
+      document.getElementById('totalSizeGB').innerText = formattedGB;
+      document.getElementById('modalTotalGB').innerText = formattedGB;
+
+      if (count > 0) {
+        bar.classList.remove('translate-y-full');
+        clearBtn.classList.remove('hidden');
+        waFloat.classList.remove('bottom-5');
+        waFloat.classList.add('bottom-24');
+      } else {
+        bar.classList.add('translate-y-full');
+        clearBtn.classList.add('hidden');
+        document.getElementById('cartModal').classList.add('hidden');
+        waFloat.classList.remove('bottom-24');
+        waFloat.classList.add('bottom-5');
+      }
+
+      document.getElementById('modalCartItems').innerHTML = selectedItems.map((g, i) => `
+        <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+          <div class="pr-2">
+            <p class="font-semibold text-slate-200">${i + 1}. ${g.nama}</p>
+            <p class="text-[10px] text-slate-400">${g.platform} • ${g.ukuran}</p>
+          </div>
+          <button onclick="toggleGame('${g.id}')" class="text-red-400 hover:text-red-300 text-xs font-bold px-2">Hapus</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleModalList() {
+      document.getElementById('cartModal').classList.toggle('hidden');
+    }
+
+    function openGeneralWA(e) {
+      e.preventDefault();
+      const text = "Halo *Nathan Game Palembang* 👋\nSaya mau tanya-tanya soal isi game PS / ketersediaan game ya min.";
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function checkoutWhatsApp() {
+      const selectedItems = allGames.filter(g => selectedGameIds.has(g.id));
+      if (selectedItems.length === 0) return;
+
+      let totalGB = 0;
+      const listLines = selectedItems.map((g, idx) => {
+        totalGB += parseSizeToGB(g.ukuran);
+        return `${idx + 1}. ${g.nama} [${g.platform}] (${g.ukuran})`;
+      }).join('\n');
+
+      const formattedGB = totalGB.toFixed(1).replace('.0', '');
+      const text = `Halo *Nathan Game Palembang* 👋\nSaya mau order isi game dengan daftar berikut:\n\n${listLines}\n\n*Total Game:* ${selectedItems.length} Game\n*Estimasi Storage:* ~${formattedGB} GB\n\nMohon info jadwal/ketersediaannya ya min. Terima kasih!`;
+
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    initCatalog();
+  </script>
+</body>
+</html>
